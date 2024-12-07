@@ -1,4 +1,4 @@
-﻿namespace Assembler
+﻿namespace VirtualMachine
 {
     public class Class1
     {
