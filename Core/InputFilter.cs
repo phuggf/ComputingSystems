@@ -1,4 +1,4 @@
-﻿namespace Assembler.Parsing
+﻿namespace Core
 {
     public class InputFilter
     {

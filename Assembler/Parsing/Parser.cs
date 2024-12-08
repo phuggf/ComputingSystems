@@ -54,10 +54,7 @@ namespace Assembler.Parsing
 
         private class ACommand : Command
         {
-            public ACommand(string commandLine)
-            {
-                Symbol = commandLine.Substring(1);
-            }
+            public ACommand(string commandLine) => Symbol = commandLine.Substring(1);
 
             public override CommandType CommandType => CommandType.A_Command;
         }
@@ -95,10 +92,7 @@ namespace Assembler.Parsing
 
         private class LCommand : Command
         {
-            public LCommand(string commandLine)
-            {
-                Symbol = commandLine.Substring(1, commandLine.Length - 2);
-            }
+            public LCommand(string commandLine) => Symbol = commandLine.Substring(1, commandLine.Length - 2);
 
             public override CommandType CommandType => CommandType.L_Command;
         }

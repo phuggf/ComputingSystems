@@ -1,5 +1,6 @@
 ﻿using Assembler.Code;
 using Assembler.Parsing;
+using Core;
 
 namespace Assembler
 {

@@ -5,7 +5,6 @@ namespace Assembler.Tests.Parsing
     [TestClass]
     public class ParserShould
     {
-
         [TestMethod]
         [DataRow([])]
         public void ReturnFalseWhenNoMoreCommands(string[] inputLines)

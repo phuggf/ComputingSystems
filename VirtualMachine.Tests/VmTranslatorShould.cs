@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using System.Text;
+
 namespace VirtualMachine.Tests
 {
     [TestClass]
@@ -6,19 +9,60 @@ namespace VirtualMachine.Tests
         [TestMethod]
         public void TranslateIntermediateLanguageToAssembly()
         {
-            //var input = File.ReadLines("Pong.asm");
+            string[] inputFileNames = { "BasicTest.vm" };
+            string outputFileName = "BasicTest.asm";
 
-            //var expectedOutput = File.ReadLines("Pong.hack").ToArray();
+            var vmTranslator = new VmTranslator();
+            List<VmFile> vmFiles = [];
 
-            //var assembler = new Assembler();
-            //var observedOutput = assembler.Assemble(input).ToArray();
+            foreach (var fileName in inputFileNames)
+            {
+                var contents = File.ReadAllLines(fileName);
+                vmFiles.Add(new VmFile(fileName, contents));
+            }
 
-            //for (int i = 0; i < expectedOutput.Length; i++)
-            //{
-            //    Assert.AreEqual(expectedOutput[i], observedOutput[i]);
-            //}
+            IEnumerable<string> assembly = vmTranslator.ConvertToAssembly(vmFiles);
 
-            //Assert.AreEqual(expectedOutput.Length, observedOutput.Length);
+            string directoryPath = @"C:\Users\Ulric\OneDrive\Documents\Projects\nand2tetris\nand2tetris\projects\07\MemoryAccess\BasicTest";
+            string fullOutputPath = Path.Combine(directoryPath, outputFileName);
+            string fullTestFilePath = Path.Combine(directoryPath, "BasicTest.tst");
+            File.WriteAllLines(fullOutputPath, assembly);
+            var error = RunTestFile(fullTestFilePath);
+            Assert.AreEqual(string.Empty, error);
+        }
+
+        private static string RunTestFile(string fullTestFilePath)
+        {
+            ProcessStartInfo cmdStartInfo = new()
+            {
+                FileName = @"C:\Windows\System32\cmd.exe",
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            Process process = new()
+            {
+                StartInfo = cmdStartInfo
+            };
+
+            var stdErr = new StringBuilder();
+            process.ErrorDataReceived += new DataReceivedEventHandler((sender, e) =>
+            {
+                // Prepend line numbers to each line of the output.
+                if (!string.IsNullOrEmpty(e.Data))
+                {
+                    stdErr.AppendLine(e.Data);
+                }
+            });
+            process.Start();
+            process.BeginErrorReadLine();
+            process.StandardInput.WriteLine(@"C:\Users\Ulric\OneDrive\Documents\Projects\nand2tetris\nand2tetris\tools\CPUEmulator" + $" {fullTestFilePath}");
+            process.WaitForExit(1000);
+
+            process.Close();
+            return stdErr.ToString();
         }
     }
 }

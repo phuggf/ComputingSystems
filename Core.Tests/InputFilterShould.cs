@@ -1,4 +1,4 @@
-﻿using Assembler.Parsing;
+﻿using Core;
 
 namespace Assembler.Tests.Parsing
 {
