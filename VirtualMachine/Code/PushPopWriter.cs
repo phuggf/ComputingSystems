@@ -2,55 +2,40 @@
 
 namespace VirtualMachine.Code
 {
-    internal class PushPopWriter
+    internal class PushPopWriter(string currentVmFile)
     {
+        private string _currentVmFile = currentVmFile;
+
         public IEnumerable<string> WritePushPop(CommandType type, string segment, int index)
         {
             if (type == CommandType.C_PUSH)
             {
-                switch (segment)
+                return segment switch
                 {
-                    case "constant":
-                        return PushConstant(index);
-                    case "local":
-                        return PushSegment("LCL", index);
-                    case "argument":
-                        return PushSegment("ARG", index);
-                    case "this":
-                        return PushSegment("THIS", index);
-                    case "that":
-                        return PushSegment("THAT", index);
-                    case "temp":
-                        return PushVariable($"R{index + 5}");
-                    case "pointer":
-                        return PushVariable($"R{index + 3}");
-                    //case "static":
-                    //    return PushVariable($"{CurrentVmFile}.{index}");
-                    default:
-                        throw new ArgumentException($"Unknown segment {segment}");
-                }
+                    "constant" => PushConstant(index),
+                    "local" => PushSegment("LCL", index),
+                    "argument" => PushSegment("ARG", index),
+                    "this" => PushSegment("THIS", index),
+                    "that" => PushSegment("THAT", index),
+                    "temp" => PushVariable($"R{index + 5}"),
+                    "pointer" => PushVariable($"R{index + 3}"),
+                    "static" => PushVariable($"{_currentVmFile}.{index}"),
+                _ => throw new ArgumentException($"Unknown segment {segment}"),
+                };
             }
             else if (type == CommandType.C_POP)
             {
-                switch (segment)
+                return segment switch
                 {
-                    case "local":
-                        return PopSegment("LCL", index);
-                    case "argument":
-                        return PopSegment("ARG", index);
-                    case "this":
-                        return PopSegment("THIS", index);
-                    case "that":
-                        return PopSegment("THAT", index);
-                    case "temp":
-                        return PopVariable($"R{index + 5}");
-                    case "pointer":
-                        return PopVariable($"R{index + 3}");
-                    //case "static":
-                    //    return PopVariable($"{CurrentVmFile}.{index}");
-                    default:
-                        throw new ArgumentException($"Unknown segment {segment}");
-                }
+                    "local" => PopSegment("LCL", index),
+                    "argument" => PopSegment("ARG", index),
+                    "this" => PopSegment("THIS", index),
+                    "that" => PopSegment("THAT", index),
+                    "temp" => PopVariable($"R{index + 5}"),
+                    "pointer" => PopVariable($"R{index + 3}"),
+                    "static" => PopVariable($"{_currentVmFile}.{index}"),
+                    _ => throw new ArgumentException($"Unknown segment {segment}"),
+                };
             }
             else
             {

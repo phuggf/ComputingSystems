@@ -10,29 +10,19 @@ namespace VirtualMachine.Code
     {
         public IEnumerable<string> GetCommands(string command)
         {
-            switch (command)
+            return command switch
             {
-                case "add":
-                    return Add();
-                case "sub":
-                    return Sub();
-                case "neg":
-                    return Neg();
-                case "eq":
-                    return Eq();
-                case "gt":
-                    return Gt();
-                case "lt":
-                    return Lt();
-                case "and":
-                    return And();
-                case "or":
-                    return Or();
-                case "not":
-                    return Not();
-                default:
-                    throw new ArgumentException($"Command {command} not allowed");
-            }
+                "add" => Add(),
+                "sub" => Sub(),
+                "neg" => Neg(),
+                "eq" => Eq(),
+                "gt" => Gt(),
+                "lt" => Lt(),
+                "and" => And(),
+                "or" => Or(),
+                "not" => Not(),
+                _ => throw new ArgumentException($"Command {command} not allowed"),
+            };
         }
 
         public IEnumerable<string> GetCommands(string command, string functionName)
@@ -49,7 +39,7 @@ namespace VirtualMachine.Code
 
         private IEnumerable<string> Sub() => GetArithmetic("M=M-D");
 
-        private IEnumerable<string> Neg() => new List<string> { "@SP", "A=M-1", "M=-M" };
+        private IEnumerable<string> Neg() => ["@SP", "A=M-1", "M=-M"];
 
         private IEnumerable<string> Eq() => GetCondition("D;JEQ");
 
@@ -61,9 +51,15 @@ namespace VirtualMachine.Code
 
         private IEnumerable<string> Or() => GetArithmetic("M=D|M");
 
-        private IEnumerable<string> Not() => new List<string> { "@SP", "A=M-1", "M=!M" };
+        private IEnumerable<string> Not() => ["@SP", "A=M-1", "M=!M"];
 
         private int _addressCounter;
+        private string fileName;
+
+        public ArithmeticWriter(string fileName)
+        {
+            this.fileName = fileName;
+        }
 
         private IEnumerable<string> GetCondition(string condition)
         {
@@ -75,8 +71,8 @@ namespace VirtualMachine.Code
             }
             else
             {
-                ret = new List<string>
-                {
+                ret =
+                [
                     "@SP",
                     "AM=M-1",
                     "D=M",
@@ -96,7 +92,7 @@ namespace VirtualMachine.Code
                     $"(E{_addressCounter})",
                     "@SP",
                     "M=M+1",
-                };
+                ];
             }
 
             _addressCounter++;
@@ -106,8 +102,8 @@ namespace VirtualMachine.Code
 
         private IEnumerable<string> GetCondition(string condition, string functionName)
         {
-            var ret = new List<string>
-            {
+            List<string> ret =
+            [
                 "@SP",
                 "AM=M-1",
                 "D=M",
@@ -127,7 +123,7 @@ namespace VirtualMachine.Code
                 $"({functionName}$E{_addressCounter})",
                 "@SP",
                 "M=M+1",
-            };
+            ];
 
             _addressCounter++;
 
@@ -136,8 +132,8 @@ namespace VirtualMachine.Code
 
         private IEnumerable<string> GetArithmetic(string operation)
         {
-            return new List<string>
-            {
+            return
+            [
                 "@SP",
                 "A=M-1",
                 "D=M",
@@ -146,7 +142,7 @@ namespace VirtualMachine.Code
                 "D=A",
                 "@SP",
                 "M=D+1",
-            };
+            ];
         }
     }
 }

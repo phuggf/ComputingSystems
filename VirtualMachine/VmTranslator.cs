@@ -18,7 +18,7 @@ namespace VirtualMachine
             {
                 var filteredLines = _inputFilter.Filter(vmFile.Contents);
                 var parser = new Parser(filteredLines);
-                var codeWriter = new CodeWriter();
+                var codeWriter = new CodeWriter(vmFile.FileName);
 
                 while(parser.MoveNext())
                 {

@@ -5,13 +5,18 @@ namespace VirtualMachine.Tests.Code
     [TestClass]
     public class CodeWriterShould
     {
+        private CodeWriter _codeWriter;
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            _codeWriter = new CodeWriter("TestVmFile");
+        }
         [TestMethod]
         public void PushConstant()
         {
-            var writer = new CodeWriter();
-
             var expected = new List<string>() { "@5", "D=A", "@SP", "M=M+1", "A=M-1", "M=D" };
-            var observed = writer.WritePushPop(CommandType.C_PUSH, "constant", 5).ToList();
+            var observed = _codeWriter.WritePushPop(CommandType.C_PUSH, "constant", 5).ToList();
 
             for (int i = 0; i < observed.Count; i++)
             {
@@ -22,11 +27,9 @@ namespace VirtualMachine.Tests.Code
         [TestMethod]
         public void PushLocal()
         {
-            var writer = new CodeWriter();
-
             var expected = new List<string>() { "@LCL", "D=M", "@2", "A=D+A", "D=M", "@SP",
                                                 "M=M+1", "A=M-1", "M=D" };
-            var observed = writer.WritePushPop(CommandType.C_PUSH, "local", 2).ToList();
+            var observed = _codeWriter.WritePushPop(CommandType.C_PUSH, "local", 2).ToList();
 
             for (int i = 0; i < observed.Count; i++)
             {
@@ -37,11 +40,9 @@ namespace VirtualMachine.Tests.Code
         [TestMethod]
         public void PopLocal()
         {
-            var writer = new CodeWriter();
-
             var expected = new List<string>() { "@LCL", "D=M", "@0", "D=D+A", "@R13", "M=D",
                                                 "@SP", "AM=M-1", "D=M", "@R13", "A=M", "M=D" };
-            var observed = writer.WritePushPop(CommandType.C_POP, "local", 0).ToList();
+            var observed = _codeWriter.WritePushPop(CommandType.C_POP, "local", 0).ToList();
 
             for (int i = 0; i < observed.Count; i++)
             {
@@ -53,10 +54,9 @@ namespace VirtualMachine.Tests.Code
         public void WriteArithmetic()
         {
             var command = "add";
-            var writer = new CodeWriter();
 
             var expected = new List<string>() { "@SP", "A=M-1", "D=M", "A=A-1", "M=D+M", "D=A", "@SP", "M=D+1" };
-            var observed = writer.WriteArithmetic(command).ToList();
+            var observed = _codeWriter.WriteArithmetic(command).ToList();
 
             for (int i = 0; i < observed.Count; i++)
             {
@@ -68,7 +68,6 @@ namespace VirtualMachine.Tests.Code
         public void WriteEqualTo()
         {
             var command = "eq";
-            var writer = new CodeWriter();
 
             var expected = new List<string>()
             {
@@ -93,7 +92,7 @@ namespace VirtualMachine.Tests.Code
                 "M=M+1",
             };
 
-            var observed = writer.WriteArithmetic(command).ToList();
+            var observed = _codeWriter.WriteArithmetic(command).ToList();
 
             for (int i = 0; i < observed.Count; i++)
             {
@@ -105,7 +104,6 @@ namespace VirtualMachine.Tests.Code
         public void WriteLessThan()
         {
             var command = "lt";
-            var writer = new CodeWriter();
 
             var expected = new List<string>()
             {
@@ -130,7 +128,7 @@ namespace VirtualMachine.Tests.Code
                 "M=M+1",
             };
 
-            var observed = writer.WriteArithmetic(command).ToList();
+            var observed = _codeWriter.WriteArithmetic(command).ToList();
 
             for (int i = 0; i < observed.Count; i++)
             {
@@ -142,7 +140,6 @@ namespace VirtualMachine.Tests.Code
         public void WriteGreaterThan()
         {
             var command = "gt";
-            var writer = new CodeWriter();
 
             var expected = new List<string>()
             {
@@ -167,7 +164,7 @@ namespace VirtualMachine.Tests.Code
                 "M=M+1",
             };
 
-            var observed = writer.WriteArithmetic(command).ToList();
+            var observed = _codeWriter.WriteArithmetic(command).ToList();
 
             for (int i = 0; i < observed.Count; i++)
             {

@@ -9,8 +9,10 @@ namespace VirtualMachine.Tests
         [TestMethod]
         public void TranslateIntermediateLanguageToAssembly()
         {
-            string[] inputFileNames = { "BasicTest.vm" };
-            string outputFileName = "BasicTest.asm";
+            string directoryPath = @"C:\Users\Ulric\OneDrive\Documents\Projects\nand2tetris\nand2tetris\projects\07\StackArithmetic\StackTest";
+            string testName = "StackTest";
+            string[] inputFileNames = { "StackTest.vm" };
+            string outputFileName = $"{testName}.asm";
 
             var vmTranslator = new VmTranslator();
             List<VmFile> vmFiles = [];
@@ -23,9 +25,9 @@ namespace VirtualMachine.Tests
 
             IEnumerable<string> assembly = vmTranslator.ConvertToAssembly(vmFiles);
 
-            string directoryPath = @"C:\Users\Ulric\OneDrive\Documents\Projects\nand2tetris\nand2tetris\projects\07\MemoryAccess\BasicTest";
+            
             string fullOutputPath = Path.Combine(directoryPath, outputFileName);
-            string fullTestFilePath = Path.Combine(directoryPath, "BasicTest.tst");
+            string fullTestFilePath = Path.Combine(directoryPath, $"{testName}.tst");
             File.WriteAllLines(fullOutputPath, assembly);
             var error = RunTestFile(fullTestFilePath);
             Assert.AreEqual(string.Empty, error);

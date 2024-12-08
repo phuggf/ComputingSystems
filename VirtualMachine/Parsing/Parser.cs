@@ -18,15 +18,20 @@ namespace VirtualMachine.Parsing
 
             var substrings = line.Split(' ');
 
-            if (substrings.Length > 1)
-            {
-                Arg1 = substrings[1];
-                Arg2 = substrings[2];
-            }
-            else
+            if(substrings.Length == 1)
             {
                 Arg1 = substrings[0];
                 Arg2 = null;
+            }
+            else if (substrings.Length == 2)
+            {
+                Arg1 += substrings[0];
+                Arg2 = substrings[1];
+            }
+            else if(substrings.Length == 3)
+            {
+                Arg1 = substrings[1];
+                Arg2 = substrings[2];
             }
 
             CommandType = _commandTypes[line.Split(' ')[0]];
