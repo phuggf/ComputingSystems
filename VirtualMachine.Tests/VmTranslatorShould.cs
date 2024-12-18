@@ -6,12 +6,18 @@ namespace VirtualMachine.Tests
     [TestClass]
     public class VmTranslatorShould
     {
+        /// <summary>
+        /// Integration test that writes a file of the VmTranslator output and runs it through
+        /// the CPU emulator supplied with the course materials. Only un-ignore if the correct
+        /// .vm files are placed in the test bin folder.
+        /// </summary>
         [TestMethod]
+        [Ignore]
         public void TranslateIntermediateLanguageToAssembly()
         {
-            string directoryPath = @"C:\Users\Ulric\OneDrive\Documents\Projects\nand2tetris\nand2tetris\projects\07\StackArithmetic\StackTest";
-            string testName = "StackTest";
-            string[] inputFileNames = { "StackTest.vm" };
+            string directoryPath = @"C:\Users\Ulric\OneDrive\Documents\Projects\nand2tetris\nand2tetris\projects\08\FunctionCalls\FibonacciElement";
+            string testName = "FibonacciElement";
+            string[] inputFileNames = { "Sys.vm", "Main.vm" };
             string outputFileName = $"{testName}.asm";
 
             var vmTranslator = new VmTranslator();
@@ -24,7 +30,6 @@ namespace VirtualMachine.Tests
             }
 
             IEnumerable<string> assembly = vmTranslator.ConvertToAssembly(vmFiles);
-
             
             string fullOutputPath = Path.Combine(directoryPath, outputFileName);
             string fullTestFilePath = Path.Combine(directoryPath, $"{testName}.tst");
@@ -33,6 +38,9 @@ namespace VirtualMachine.Tests
             Assert.AreEqual(string.Empty, error);
         }
 
+        /// <summary>
+        /// Run the CPUEmulator supplied with the course through cmd and give it the test script.
+        /// </summary>
         private static string RunTestFile(string fullTestFilePath)
         {
             ProcessStartInfo cmdStartInfo = new()
@@ -52,12 +60,12 @@ namespace VirtualMachine.Tests
             var stdErr = new StringBuilder();
             process.ErrorDataReceived += new DataReceivedEventHandler((sender, e) =>
             {
-                // Prepend line numbers to each line of the output.
                 if (!string.IsNullOrEmpty(e.Data))
                 {
                     stdErr.AppendLine(e.Data);
                 }
             });
+
             process.Start();
             process.BeginErrorReadLine();
             process.StandardInput.WriteLine(@"C:\Users\Ulric\OneDrive\Documents\Projects\nand2tetris\nand2tetris\tools\CPUEmulator" + $" {fullTestFilePath}");

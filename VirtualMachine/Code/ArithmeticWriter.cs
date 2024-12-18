@@ -54,12 +54,6 @@ namespace VirtualMachine.Code
         private IEnumerable<string> Not() => ["@SP", "A=M-1", "M=!M"];
 
         private int _addressCounter;
-        private string fileName;
-
-        public ArithmeticWriter(string fileName)
-        {
-            this.fileName = fileName;
-        }
 
         private IEnumerable<string> GetCondition(string condition)
         {

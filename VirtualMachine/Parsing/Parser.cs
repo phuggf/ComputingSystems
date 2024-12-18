@@ -18,6 +18,8 @@ namespace VirtualMachine.Parsing
 
             var substrings = line.Split(' ');
 
+            CommandType = _commandTypes[substrings[0]];
+
             if(substrings.Length == 1)
             {
                 Arg1 = substrings[0];
@@ -25,16 +27,14 @@ namespace VirtualMachine.Parsing
             }
             else if (substrings.Length == 2)
             {
-                Arg1 += substrings[0];
-                Arg2 = substrings[1];
+                Arg1 = substrings[1];
+                Arg2 = null;
             }
             else if(substrings.Length == 3)
             {
                 Arg1 = substrings[1];
                 Arg2 = substrings[2];
             }
-
-            CommandType = _commandTypes[line.Split(' ')[0]];
 
             return true;
         }

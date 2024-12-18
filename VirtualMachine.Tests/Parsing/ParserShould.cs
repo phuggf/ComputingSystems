@@ -31,6 +31,9 @@ namespace VirtualMachine.Tests.Parsing
         [DataRow("push constant 7", CommandType.C_PUSH)]
         [DataRow("pop local 0", CommandType.C_POP)]
         [DataRow("add", CommandType.C_ARITHMETIC)]
+        [DataRow("label WHILE", CommandType.C_LABEL)]
+        [DataRow("goto WHILE", CommandType.C_GOTO)]
+        [DataRow("if-goto IF_TRUE", CommandType.C_IF)]
         public void ReturnCorrectCommandType(string command, CommandType expectedCommandType)
         {
             IEnumerable<string> inputLines = [command];
@@ -43,6 +46,9 @@ namespace VirtualMachine.Tests.Parsing
         [DataRow("push constant 7", "constant")]
         [DataRow("push local 0", "local")]
         [DataRow("add", "add")] // specified in book
+        [DataRow("label WHILE", "WHILE")]
+        [DataRow("goto WHILE", "WHILE")]
+        [DataRow("if-goto IF_TRUE", "IF_TRUE")]
         public void ReturnCorrectArg1(string command, string expectedArg1)
         {
             IEnumerable<string> inputLines = [command];
@@ -56,6 +62,9 @@ namespace VirtualMachine.Tests.Parsing
         [DataRow("function mult 2", "2")]
         [DataRow("push local 0", "0")]
         [DataRow("add", null)]
+        [DataRow("label WHILE", null)]
+        [DataRow("goto WHILE", null)]
+        [DataRow("if-goto IF_TRUE", null)]
         public void ReturnCorrectArg2(string command, string expectedArg1)
         {
             IEnumerable<string> inputLines = [command];
