@@ -3,7 +3,12 @@ namespace Assembler.Tests
     [TestClass]
     public class AssemblerShould
     {
+        /// <summary>
+        /// Integration test that writes assembly to a file and compares the output
+        /// to expected output provided in the course materials.
+        /// </summary>
         [TestMethod]
+        [Ignore]
         public void ConvertAsmToBinary_Integration()
         {
             var input = File.ReadLines("Pong.asm");

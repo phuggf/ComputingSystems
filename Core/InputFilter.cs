@@ -2,29 +2,45 @@
 {
     public class InputFilter
     {
+        private bool _isCommentedOut = false;
+
         public IEnumerable<string> Filter(IEnumerable<string> inputLines)
         {
-            bool IsCommandLine(string inputLine)
-            {
-                if (string.IsNullOrWhiteSpace(inputLine))
-                    return false;
-                if (inputLine.StartsWith("//"))
-                    return false;
+            return inputLines.Select(TrimLine).Where(line => !string.IsNullOrWhiteSpace(line));
+        }
 
-                return true;
+        private string TrimLine(string inputLine)
+        {
+            var lineCommentIndex = inputLine.IndexOf("//");
+            var commentStartIndex = inputLine.IndexOf("/*");
+            var commentEndIndex = inputLine.IndexOf("*/");
+            
+            if (lineCommentIndex != -1)
+            {
+                inputLine = inputLine.Substring(0, lineCommentIndex);
+            }
+            else if (commentStartIndex != -1 && commentEndIndex != -1)
+            {
+                inputLine = inputLine.Substring(0, commentStartIndex) +
+                            inputLine.Substring(commentEndIndex + 2);
+            }
+            else if (commentStartIndex != -1)
+            {
+                inputLine = inputLine.Substring(0, commentStartIndex);
+                _isCommentedOut = true;
+            }
+            else if (commentEndIndex != -1)
+            {
+                inputLine = inputLine.Substring(commentEndIndex + 2);
+                _isCommentedOut = false;
             }
 
-            string TrimCommand(string inputLine)
+            if (_isCommentedOut && commentStartIndex == -1 )
             {
-                var commentIndex = inputLine.IndexOf("//");
-
-                if (commentIndex != -1)
-                    inputLine = inputLine.Substring(0, commentIndex);
-
-                return inputLine.Trim();
+                return string.Empty;
             }
 
-            return inputLines.Where(IsCommandLine).Select(TrimCommand);
+            return inputLine.Replace("  ", " ").Trim();
         }
     }
 }
