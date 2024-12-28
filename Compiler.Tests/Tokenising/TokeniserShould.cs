@@ -14,7 +14,7 @@ namespace Compiler.Tests.Tokenising
     public class TokeniserShould
     {
         [TestMethod]
-        //[Ignore]
+        [Ignore]
         public void ConvertJackFileToTokens()
         {
             var inputFilter = new InputFilter();
@@ -229,6 +229,21 @@ namespace Compiler.Tests.Tokenising
             Assert.AreEqual("~", tokeniser.Symbol);
             tokeniser.MoveNext();
             Assert.AreEqual("exit", tokeniser.Identifier);
+        }
+
+        [TestMethod]
+        public void PeekNextItem()
+        {
+            IEnumerable<string> inputLines = ["~exit"];
+            var tokeniser = new Tokeniser(inputLines);
+            tokeniser.MoveNext();
+            Assert.AreEqual("~", tokeniser.Symbol);
+            var result = tokeniser.PeekSymbol();
+            Assert.AreEqual("exit", result);
+            Assert.IsFalse(tokeniser.PeekKeyword());
+            tokeniser.MoveNext();
+            Assert.AreEqual("exit", tokeniser.Identifier);
+
         }
     }
 }

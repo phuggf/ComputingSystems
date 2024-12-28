@@ -108,6 +108,36 @@ namespace Compiler.Tokenising
             return true;
         }
 
+        public string PeekSymbol()
+        {
+            if (_currentTokens.Count == 0)
+            {
+                if (!_lineEnumerator.MoveNext())
+                {
+                    return null;
+                }
+
+                PopulateCurrentTokens();
+            }
+
+            return _currentTokens[0];
+        }
+
+        public bool PeekKeyword()
+        {
+            if (_currentTokens.Count == 0)
+            {
+                if (!_lineEnumerator.MoveNext())
+                {
+                    return default;
+                }
+
+                PopulateCurrentTokens();
+            }
+
+            return _keywords.Contains(_currentTokens[0]);
+        }
+
         private void PopulateCurrentTokens()
         {
             string line = _lineEnumerator.Current;

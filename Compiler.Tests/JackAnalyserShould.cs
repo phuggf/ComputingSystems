@@ -15,13 +15,15 @@ namespace Compiler.Tests
     public class JackAnalyserShould
     {
         [TestMethod]
-        public void ConvertJackFileToXml()
+        //[Ignore]
+        public void ConvertJackFileToXml_WithoutExpressions()
         {
             var inputLines = File.ReadLines("Main.jack").ToArray();
             var expectedOutput = File.ReadLines("Main.xml").ToArray();
 
             var jackAnalyser = new JackAnalyser();
             var observedOutput = jackAnalyser.Compile(inputLines).ToArray();
+            File.WriteAllLines("Observed.xml", observedOutput);
 
             for (int i = 0; i < expectedOutput.Length; i++)
             {
@@ -29,6 +31,7 @@ namespace Compiler.Tests
             }
 
             Assert.AreEqual(expectedOutput.Length, observedOutput.Length);
+
         }
     }
 }
