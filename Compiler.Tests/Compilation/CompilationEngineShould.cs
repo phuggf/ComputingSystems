@@ -1,12 +1,6 @@
 ﻿using Compiler.Compilation;
 using Compiler.Tokenising;
-using Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace Compiler.Tests.Compilation
@@ -76,6 +70,46 @@ namespace Compiler.Tests.Compilation
             var tokeniser = new Tokeniser(input);
             var engine = new CompilationEngine(tokeniser);
             XElement result = engine.CompileClassVarDec();
+
+            Assert.AreEqual(expectedOutput, result.ToString());
+        }
+
+        [TestMethod]
+        //[Ignore]
+        public void CompileConstructor()
+        {
+            var input = new string[]
+            {
+                "constructor Square new() {",
+                "}",
+            };
+
+            var element = new XElement("subroutineDec");
+            element.Add(new XElement(Keyw, "constructor"));
+            element.Add(new XElement(Iden, "Square"));
+            element.Add(new XElement(Iden, "new"));
+            element.Add(new XElement(Symb, "("));
+
+            var parameterList = new XElement("parameterList", string.Empty);
+            element.Add(parameterList);
+
+            element.Add(new XElement(Symb, ")"));
+
+            var subroutineBody = new XElement("subroutineBody");
+            element.Add(subroutineBody);
+
+            subroutineBody.Add(new XElement(Symb, "{"));
+
+            var statements = new XElement("statements", string.Empty);
+            subroutineBody.Add(statements);
+
+            subroutineBody.Add(new XElement(Symb, "}"));
+
+            var expectedOutput = element.ToString();
+
+            var tokeniser = new Tokeniser(input);
+            var engine = new CompilationEngine(tokeniser);
+            XElement result = engine.CompileSubroutine();
 
             Assert.AreEqual(expectedOutput, result.ToString());
         }
@@ -262,20 +296,20 @@ namespace Compiler.Tests.Compilation
         {
             var input = new string[] { "do game.run();", };
 
-            var letElement = new XElement("doStatement");
-            letElement.Add(new XElement(Keyw, "do"));
-            letElement.Add(new XElement(Iden, "game"));
-            letElement.Add(new XElement(Symb, "."));
-            letElement.Add(new XElement(Iden, "run"));
-            letElement.Add(new XElement(Symb, "("));
+            var doElement = new XElement("doStatement");
+            doElement.Add(new XElement(Keyw, "do"));
+            doElement.Add(new XElement(Iden, "game"));
+            doElement.Add(new XElement(Symb, "."));
+            doElement.Add(new XElement(Iden, "run"));
+            doElement.Add(new XElement(Symb, "("));
 
             var expressionList = new XElement("expressionList", string.Empty);
-            letElement.Add(expressionList);
+            doElement.Add(expressionList);
 
-            letElement.Add(new XElement(Symb, ")"));
-            letElement.Add(new XElement(Symb, ";"));
+            doElement.Add(new XElement(Symb, ")"));
+            doElement.Add(new XElement(Symb, ";"));
 
-            var expectedOutput = letElement.ToString();
+            var expectedOutput = doElement.ToString();
 
             var tokeniser = new Tokeniser(input);
             var engine = new CompilationEngine(tokeniser);
@@ -321,7 +355,7 @@ namespace Compiler.Tests.Compilation
             letElement.Add(new XElement(Symb, ")"));
             letElement.Add(new XElement(Symb, "{"));
 
-            var statements = new XElement("statements");
+            var statements = new XElement("statements", string.Empty);
             letElement.Add(statements);
 
             letElement.Add(new XElement(Symb, "}"));
@@ -359,7 +393,7 @@ namespace Compiler.Tests.Compilation
             letElement.Add(new XElement(Symb, ")"));
             letElement.Add(new XElement(Symb, "{"));
 
-            var ifStatements = new XElement("statements");
+            var ifStatements = new XElement("statements", string.Empty);
             letElement.Add(ifStatements);
 
             letElement.Add(new XElement(Symb, "}"));
@@ -367,7 +401,7 @@ namespace Compiler.Tests.Compilation
             letElement.Add(new XElement(Keyw, "else"));
             letElement.Add(new XElement(Symb, "{"));
 
-            var elseStatements = new XElement("statements");
+            var elseStatements = new XElement("statements", string.Empty);
             letElement.Add(ifStatements);
 
             letElement.Add(new XElement(Symb, "}"));
@@ -404,7 +438,7 @@ namespace Compiler.Tests.Compilation
             letElement.Add(new XElement(Symb, ")"));
             letElement.Add(new XElement(Symb, "{"));
 
-            var statements = new XElement("statements");
+            var statements = new XElement("statements", string.Empty);
             letElement.Add(statements);
 
             letElement.Add(new XElement(Symb, "}"));
@@ -419,37 +453,125 @@ namespace Compiler.Tests.Compilation
         }
 
 
-        //[TestMethod]
-        //public void CompileStatementSequence()
-        //{
-        //    var input = new string[]
-        //    {
-        //        "let game = game",
-        //        "do game.run();",
-        //        "while (a) {",
-        //        "}"
-        //    };
+        [TestMethod]
+        public void CompileNestedStatements()
+        {
+            var input = new string[]
+            {
+                "if (a) {",
+                "do erase();",
+                "}"
+            };
 
-        //    var letElement = new XElement("letStatement");
-        //    letElement.Add(new XElement("keyword", "let"));
-        //    letElement.Add(new XElement("identifier", "game"));
-        //    letElement.Add(new XElement("symbol", "="));
+            var ifElement = new XElement("ifStatement");
+            ifElement.Add(new XElement(Keyw, "if"));
+            ifElement.Add(new XElement(Symb, "("));
 
-        //    var expression = new XElement("expression");
-        //    var term = new XElement("term");
-        //    term.Add(new XElement("idetifier", "game"));
-        //    expression.Add(term);
-        //    letElement.Add(expression);
+            var expression = new XElement("expression");
+            var term = new XElement("term");
+            term.Add(new XElement(Iden, "a"));
+            expression.Add(term);
+            ifElement.Add(expression);
 
-        //    letElement.Add(new XElement("symbol", ";"));
+            ifElement.Add(new XElement(Symb, ")"));
+            ifElement.Add(new XElement(Symb, "{"));
 
-        //    var expectedOutput = letElement.ToString();
+            var statements = new XElement("statements", string.Empty);
 
-        //    var tokeniser = new Tokeniser(input);
-        //    var engine = new CompilationEngine(tokeniser);
-        //    XElement result = engine.CompileVarDec();
+            var doElement = new XElement("doStatement");
+            doElement.Add(new XElement(Keyw, "do"));
+            doElement.Add(new XElement(Iden, "erase"));
+            doElement.Add(new XElement(Symb, "("));
+            var expressionList = new XElement("expressionList", string.Empty);
+            doElement.Add(expressionList);
+            doElement.Add(new XElement(Symb, ")"));
+            doElement.Add(new XElement(Symb, ";"));
 
-        //    Assert.AreEqual(expectedOutput, result.ToString());
-        //}
+            statements.Add(doElement);
+            ifElement.Add(statements);
+
+            ifElement.Add(new XElement(Symb, "}"));
+
+            var expectedOutput = ifElement.ToString();
+
+            var tokeniser = new Tokeniser(input);
+            var engine = new CompilationEngine(tokeniser);
+            XElement result = engine.CompileIfStatement();
+
+            Assert.AreEqual(expectedOutput, result.ToString());
+        }
+
+        [TestMethod]
+        public void CompileExpression()
+        {
+            var input = new string[] { "x + size)" };
+
+            var expression = new XElement("expression");
+            var term1 = new XElement("term");
+            term1.Add(new XElement(Iden, "x"));
+            expression.Add(term1);
+
+            expression.Add(new XElement(Symb, "+"));
+
+            var term2 = new XElement("term");
+            term2.Add(new XElement(Iden, "size"));
+            expression.Add(term2);
+
+            var expectedOutput = expression.ToString();
+
+            var tokeniser = new Tokeniser(input);
+            var engine = new CompilationEngine(tokeniser);
+            XElement result = engine.CompileExpression();
+
+            Assert.AreEqual(expectedOutput, result.ToString());
+        }
+
+        [TestMethod]
+        public void CompileTerm_Var()
+        {
+            var input = new string[] { "SquareGame.new();" };
+
+            var term = new XElement("term");
+            term.Add(new XElement(Iden, "SquareGame"));
+            term.Add(new XElement(Symb, "."));
+            term.Add(new XElement(Iden, "new"));
+            term.Add(new XElement(Symb, "("));
+            term.Add(new XElement("expressionList", string.Empty));
+            term.Add(new XElement(Symb, ")"));
+
+            var expectedOutput = term.ToString();
+
+            var tokeniser = new Tokeniser(input);
+            var engine = new CompilationEngine(tokeniser);
+            XElement result = engine.CompileTerm();
+
+            Assert.AreEqual(expectedOutput, result.ToString());
+        }
+
+        [TestMethod]
+        public void CompileTerm_Arr()
+        {
+            var input = new string[] { "a[2];" };
+
+            var term = new XElement("term");
+            term.Add(new XElement(Iden, "a"));
+            term.Add(new XElement(Symb, "["));
+
+            var exp = new XElement("expression");
+            var subTerm = new XElement("term");
+            subTerm.Add(new XElement("integerConstant", 2));
+            exp.Add(subTerm);
+            term.Add(exp);
+
+            term.Add(new XElement(Symb, "]"));
+
+            var expectedOutput = term.ToString();
+
+            var tokeniser = new Tokeniser(input);
+            var engine = new CompilationEngine(tokeniser);
+            XElement result = engine.CompileTerm();
+
+            Assert.AreEqual(expectedOutput, result.ToString());
+        }
     }
 }

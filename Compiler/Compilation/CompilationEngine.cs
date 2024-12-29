@@ -1,4 +1,5 @@
 ﻿using Compiler.Tokenising;
+using System.Linq.Expressions;
 using System.Xml.Linq;
 
 namespace Compiler.Compilation
@@ -39,7 +40,16 @@ namespace Compiler.Compilation
         {
             var element = new XElement("subroutineDec");
             AddKeyword(element);
-            AddKeyword(element);
+
+            if (_tokeniser.PeekKeyword())
+            {
+                AddKeyword(element);
+            }
+            else
+            {
+                AddIdentifier(element);
+            }
+
             AddIdentifier(element);
             AddSymbol(element);
             element.Add(CompileParameterList());
@@ -47,7 +57,12 @@ namespace Compiler.Compilation
 
             var subroutineBody = new XElement("subroutineBody");
             AddSymbol(subroutineBody);
-            subroutineBody.Add(CompileVarDec());
+
+            while (_tokeniser.PeekSymbol() == "var")
+            {
+                subroutineBody.Add(CompileVarDec());
+            }
+
             subroutineBody.Add(CompileStatements());
             AddSymbol(subroutineBody);
             element.Add(subroutineBody);
@@ -116,7 +131,17 @@ namespace Compiler.Compilation
         {
             var element = new XElement("returnStatement");
             AddKeyword(element);
-            AddSymbol(element);
+
+            if (_tokeniser.PeekSymbol() == ";")
+            {
+                AddSymbol(element);
+            }
+            else
+            {
+                AddExpression(element);
+                AddSymbol(element);
+            }
+
             return element;
         }
 
@@ -137,8 +162,13 @@ namespace Compiler.Compilation
             var element = new XElement("doStatement");
             AddKeyword(element);
             AddIdentifier(element);
-            AddSymbol(element);
-            AddIdentifier(element);
+
+            if (_tokeniser.PeekSymbol() == ".")
+            {
+                AddSymbol(element);
+                AddIdentifier(element);
+            }
+
             AddSymbol(element);
             AddExpressionList(element);
             AddSymbol(element);
@@ -154,14 +184,18 @@ namespace Compiler.Compilation
             AddExpression(element);
             AddSymbol(element);
             AddSymbol(element);
-            AddStatements(element);
+
+            var ifStatements = CompileStatements();
+            element.Add(ifStatements);
+
             AddSymbol(element);
 
             if (_tokeniser.PeekSymbol() == "else")
             {
                 AddKeyword(element);
                 AddSymbol(element);
-                AddStatements(element);
+                var elseStatements = CompileStatements();
+                element.Add(elseStatements);
                 AddSymbol(element);
             }
 
@@ -176,22 +210,146 @@ namespace Compiler.Compilation
             AddExpression(element);
             AddSymbol(element);
             AddSymbol(element);
-            AddStatements(element);
+
+            var statements = CompileStatements();
+            element.Add(statements);
+
             AddSymbol(element);
             return element;
         }
 
-        private void AddStatements(XElement element)
+        public XElement CompileExpression() 
         {
-            var statements = new XElement("statements", string.Empty);
-            element.Add(statements);
+            var expression = new XElement("expression");
+
+            if(_tokeniser.PeekSymbol() == "(")
+            {
+                var term = new XElement("term");
+                AddSymbol(term);
+                term.Add(CompileExpression());
+                AddSymbol(term);
+                expression.Add(term);
+            }
+
+            while( !IsExpressionEnd(_tokeniser.PeekSymbol()))
+            {
+                _tokeniser.MoveNext();
+                switch (_tokeniser.TokenType)
+                {
+                    case TokenType.KEYWORD:
+                        var keywTerm = new XElement("term");
+                        keywTerm.Add(new XElement("keyword", _tokeniser.Keyword));
+                        expression.Add(keywTerm);
+                        break;
+                    case TokenType.SYMBOL:
+                        expression.Add(new XElement("symbol", _tokeniser.Symbol));
+                        break;
+                    case TokenType.IDENTIFIER:
+                        var idenTerm = new XElement("term");
+                        idenTerm.Add(new XElement("identifier", _tokeniser.Identifier));
+                        expression.Add(idenTerm);
+                        break;
+                    case TokenType.INT_CONST:
+                        var intTerm = new XElement("term");
+                        intTerm.Add(new XElement("integerConstant", _tokeniser.IntValue));
+                        expression.Add(intTerm);
+                        break;
+                    case TokenType.STRING_CONST:
+                        var strTerm = new XElement("term");
+                        strTerm.Add(new XElement("stringConstant", _tokeniser.StringValue));
+                        expression.Add(strTerm);
+                        break;
+                }
+            }
+
+            return expression;
+        }
+
+        public XElement CompileTerm()
+        {
+            var term = new XElement("term");
+
+            _tokeniser.MoveNext();
+            switch (_tokeniser.TokenType)
+            {
+                case TokenType.KEYWORD:
+                    term.Add(new XElement("keyword", _tokeniser.Keyword));
+                    return term;
+                case TokenType.SYMBOL:
+                    term.Add(new XElement("symbol", _tokeniser.Symbol));
+                    return term;
+                case TokenType.IDENTIFIER:
+                    term.Add(new XElement("identifier", _tokeniser.Identifier));
+                    if(_tokeniser.PeekSymbol() == ".")
+                    {
+                        AddSymbol(term);
+                        AddIdentifier(term);
+                        AddSymbol(term);
+                        term.Add(new XElement("expressionList", string.Empty));
+                        AddSymbol(term);
+                    }
+                    else if( _tokeniser.PeekSymbol() == "[")
+                    {
+                        AddSymbol(term);
+                        term.Add(CompileExpression());
+                        AddSymbol(term);
+                    }
+                    return term;
+                case TokenType.INT_CONST:
+                    term.Add(new XElement("integerConstant", _tokeniser.IntValue));
+                    return term;
+                case TokenType.STRING_CONST:
+                    term.Add(new XElement("stringConstant", _tokeniser.StringValue));
+                    return term;
+            }
+
+            return term;
+
+            //while (_tokeniser.PeekSymbol() != ";")
+            //{
+            //    _tokeniser.MoveNext();
+            //    switch (_tokeniser.TokenType)
+            //    {
+            //        case TokenType.KEYWORD:
+            //            term.Add(new XElement("keyword", _tokeniser.Keyword));
+            //            expression.Add(keywTerm);
+            //            break;
+            //        case TokenType.SYMBOL:
+            //            expression.Add(new XElement("symbol", _tokeniser.Symbol));
+            //            break;
+            //        case TokenType.IDENTIFIER:
+            //            var idenTerm = new XElement("term");
+            //            idenTerm.Add(new XElement("identifier", _tokeniser.Identifier));
+            //            expression.Add(idenTerm);
+            //            break;
+            //        case TokenType.INT_CONST:
+            //            var intTerm = new XElement("term");
+            //            intTerm.Add(new XElement("integerConstant", _tokeniser.IntValue));
+            //            expression.Add(intTerm);
+            //            break;
+            //        case TokenType.STRING_CONST:
+            //            var strTerm = new XElement("term");
+            //            strTerm.Add(new XElement("stringConstant", _tokeniser.StringValue));
+            //            expression.Add(strTerm);
+            //            break;
+            //    }
+            //}
         }
 
         private void AddExpression(XElement element)
         {
             var expression = new XElement("expression");
             var term = new XElement("term");
-            AddIdentifier(term);
+
+            if (_tokeniser.PeekKeyword())
+            {
+                AddKeyword(term);
+            }
+            else
+            {
+                AddIdentifier(term);
+            }
+
             expression.Add(term);
             element.Add(expression);
         }
@@ -199,6 +357,18 @@ namespace Compiler.Compilation
         private void AddExpressionList(XElement element)
         {
             var expressionList = new XElement("expressionList", string.Empty);
+
+            if(_tokeniser.PeekSymbol() != ")")
+            {
+                AddExpression(expressionList);
+            }
+
+            while(_tokeniser.PeekSymbol() != ")")
+            {
+                AddSymbol(expressionList);
+                AddExpression(expressionList);
+            }
+
             element.Add(expressionList);
         }
 
@@ -250,7 +420,12 @@ namespace Compiler.Compilation
                                                  name == "while" ||
                                                  name == "if" ||
                                                  name == "return";
-        private bool IsSubroutine(string name) => name == "method" || name == "function";
+        private bool IsSubroutine(string name) => name == "method" ||
+                                                  name == "function" ||
+                                                  name == "constructor";
+
+        private bool IsExpressionEnd(string name) => name == ")" ||
+                                                     name == "]";
 
     }
 }
